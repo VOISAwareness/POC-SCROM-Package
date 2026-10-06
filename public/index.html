@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>VOIS LMS Player</title>
+  <title>Learning Portal</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">VOIS<span>LMS</span><i>.</i></div>
+    <div class="brand">Learning <span>Portal</span><i>.</i></div>
     <div class="user">
       <span class="user-name">learner-001</span>
       <span class="avatar" aria-hidden="true">L</span>
@@ -76,10 +76,11 @@
           <select id="pageSelect"></select>
         </label>
         <span id="courseStatus" class="pill">not attempted</span>
-        <button id="closeBtn" class="btn btn-outline">Close Course <span aria-hidden="true">✕</span></button>
+        <button id="fullscreenBtn" class="btn btn-peach" type="button">Full Screen <span aria-hidden="true">⛶</span></button>
+        <button id="closeBtn" class="btn btn-outline" type="button">Close Course <span aria-hidden="true">✕</span></button>
       </div>
-      <div class="frame">
-        <iframe id="player" title="SCORM course" allow="fullscreen; autoplay"></iframe>
+      <div id="frame" class="frame">
+        <iframe id="player" title="SCORM course" allow="fullscreen; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
       </div>
     </section>
   </main>
