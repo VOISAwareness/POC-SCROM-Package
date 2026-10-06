@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const express = require('express');
 const multer = require('multer');
 const AdmZip = require('adm-zip');
+const { scanPackage } = require('./security-scan');
 
 const PORT = process.env.PORT || 3000;
 const UPLOAD_DIR = path.join(__dirname, 'uploads');
@@ -21,8 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/packages', express.static(UPLOAD_DIR));
 
 // Extract every entry of the zip under `dest`, refusing entries that would escape it.
-function extractZip(buffer, dest) {
-  const entries = new AdmZip(buffer).getEntries();
+function extractZip(entries, dest) {
   for (const entry of entries) {
     const target = path.resolve(dest, entry.entryName);
     if (target !== dest && !target.startsWith(dest + path.sep)) {
@@ -113,12 +113,28 @@ app.post('/api/packages', upload.single('package'), (req, res) => {
     return res.status(400).json({ error: 'Please upload a .zip SCORM package.' });
   }
 
+  let entries;
+  try {
+    entries = new AdmZip(req.file.buffer).getEntries();
+  } catch (err) {
+    return res.status(422).json({
+      error: 'Upload blocked: the file is not a valid zip archive.',
+      security: { passed: false, summary: 'Valid zip archive — could not be opened', checks: [{ id: 'archive', label: 'Valid zip archive', status: 'fail', detail: 'The file could not be opened as a zip archive' }] },
+    });
+  }
+
+  // Scan before anything touches the disk.
+  const security = scanPackage(entries);
+  if (!security.passed) {
+    return res.status(422).json({ error: `Upload blocked by security scan: ${security.summary}`, security });
+  }
+
   const id = crypto.randomUUID();
   const dest = path.join(UPLOAD_DIR, id);
   fs.mkdirSync(dest, { recursive: true });
 
   try {
-    const fileCount = extractZip(req.file.buffer, dest);
+    const fileCount = extractZip(entries, dest);
 
     const manifestPath = findManifest(dest);
     const root = manifestPath ? path.dirname(manifestPath) : dest;
@@ -151,6 +167,7 @@ app.post('/api/packages', upload.single('package'), (req, res) => {
       manifestLaunch,
       pages: pages.map((name) => ({ name, url: toUrl(name) })),
       files: fileCount,
+      security,
     });
   } catch (err) {
     fs.rmSync(dest, { recursive: true, force: true });

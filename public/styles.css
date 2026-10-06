@@ -74,7 +74,8 @@ main { flex: 1; display: flex; min-height: 0; padding: 16px; }
 .upload-view { flex: 1; display: flex; flex-direction: column; gap: 16px; }
 .cards {
   display: grid; gap: 16px;
-  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  max-width: 920px;
   align-items: stretch;
 }
 .card {
@@ -109,26 +110,39 @@ main { flex: 1; display: flex; min-height: 0; padding: 16px; }
   background: linear-gradient(150deg, #f7d6b6 0%, var(--peach) 55%, #eab17f 100%);
   color: var(--peach-ink); border: 2px dashed rgba(42, 29, 20, .35); cursor: pointer;
 }
-.card-peach .tag {
-  align-self: flex-start; font-size: 10.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
-  background: rgba(42, 29, 20, .12);
-}
-.plus {
-  position: absolute; right: 18px; bottom: 18px;
-  width: 72px; height: 72px; border-radius: 50%;
-  display: grid; place-items: center;
-  background: var(--red); color: #fff; font-size: 46px; line-height: 1; font-weight: 300;
-  box-shadow: 0 8px 20px rgba(230, 0, 0, .35);
-  transition: transform .2s;
-}
-.card-peach .card-desc { max-width: 78%; }
 .card-peach code { background: rgba(42, 29, 20, .1); padding: 1px 4px; border-radius: 3px; }
 .drop-zone:hover, .drop-zone:focus-visible, .drop-zone.dragging {
   outline: none; transform: translateY(-3px);
   border-color: var(--red); box-shadow: 0 14px 36px rgba(244, 196, 154, .25);
 }
-.drop-zone:hover .plus, .drop-zone.dragging .plus { transform: rotate(90deg) scale(1.05); }
 .drop-zone.busy { pointer-events: none; opacity: .6; }
+
+/* Upload icon */
+.card-icon {
+  width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center;
+  background: var(--peach-ink); color: var(--peach);
+}
+
+/* Security scan card */
+.card-secure {
+  background: linear-gradient(160deg, #173327 0%, #1a1f2c 70%);
+  border-color: rgba(76, 195, 138, .45);
+}
+.card-secure .card-title { color: var(--peach); display: flex; align-items: center; gap: 8px; }
+.card-secure .card-meta .code::before { color: var(--green); }
+.shield { color: var(--green); display: inline-flex; }
+.check-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; font-size: 12.5px; }
+.check-list li { display: flex; align-items: flex-start; gap: 8px; }
+.check-list li::before {
+  content: "✓"; flex: none; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 10px; font-weight: 700; background: rgba(76, 195, 138, .18); color: var(--green); margin-top: 2px;
+}
+.check-list li.fail { color: #ffb3b3; }
+.check-list li.fail::before { content: "✕"; background: rgba(230, 0, 0, .2); color: var(--red-soft); }
+.check-list li.warn::before { content: "!"; background: rgba(244, 196, 154, .2); color: var(--peach); }
+.check-list .detail { display: block; color: var(--muted); font-size: 11.5px; }
+.card-secure.blocked { border-color: rgba(230, 0, 0, .7); }
+.card-secure.blocked .card-meta .code::before { color: var(--red); }
 
 /* Buttons */
 .btn {
@@ -175,6 +189,7 @@ main { flex: 1; display: flex; min-height: 0; padding: 16px; }
 }
 .pill.passed, .pill.completed { background: rgba(76, 195, 138, .15); color: var(--green); }
 .pill.failed { background: rgba(230, 0, 0, .15); color: var(--red-soft); }
+.pill-safe { display: inline-flex; align-items: center; gap: 6px; background: rgba(76, 195, 138, .15); color: var(--green); cursor: help; }
 .frame {
   flex: 1; display: flex; border-radius: 10px; overflow: hidden;
   border: 1px solid var(--border); background: #fff; min-height: 60vh;
@@ -203,5 +218,5 @@ body.playing .frame { border: 0; border-radius: 0; min-height: 0; }
   .step { gap: 6px; }
   .step .label br { display: none; }
   .card { min-height: 0; }
-  .card-peach { min-height: 230px; }
+  .card-peach { min-height: 0; }
 }
