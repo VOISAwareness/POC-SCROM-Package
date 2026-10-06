@@ -1,0 +1,27 @@
+{
+  "name": "poc-scrom-package",
+  "version": "1.0.0",
+  "description": "Dummy LMS that uploads a SCORM zip, extracts it and launches the course",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build:sample": "node scripts/build-sample.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VOISAwareness/POC-SCROM-Package.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VOISAwareness/POC-SCROM-Package/issues"
+  },
+  "homepage": "https://github.com/VOISAwareness/POC-SCROM-Package#readme",
+  "dependencies": {
+    "adm-zip": "^0.6.1",
+    "express": "^5.2.1",
+    "multer": "^2.4.0"
+  },
+  "private": true
+}

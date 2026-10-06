@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SCORM LMS Player</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">LMS</span>
+      <span>Learning Management System <small>· POC</small></span>
+    </div>
+    <div id="courseBar" class="course-bar" hidden>
+      <span id="courseTitle" class="course-title"></span>
+      <label id="pagePicker" class="page-picker" hidden>
+        <span>Page</span>
+        <select id="pageSelect"></select>
+      </label>
+      <span id="courseStatus" class="pill">not attempted</span>
+      <button id="closeBtn" class="btn">Close course</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="uploadView" class="upload-view">
+      <label id="dropZone" class="drop-zone" for="fileInput" tabindex="0">
+        <span class="plus" aria-hidden="true">+</span>
+        <strong>Add SCORM package</strong>
+        <span class="hint">Click to browse or drag &amp; drop your course <code>.zip</code> here</span>
+        <input id="fileInput" type="file" accept=".zip,application/zip" hidden />
+      </label>
+      <div id="progress" class="progress" hidden>
+        <div class="spinner"></div>
+        <span id="progressText">Uploading…</span>
+      </div>
+      <p id="error" class="error" hidden></p>
+    </section>
+
+    <section id="playerView" class="player-view" hidden>
+      <iframe id="player" title="SCORM course" allow="fullscreen; autoplay"></iframe>
+    </section>
+  </main>
+
+  <script src="scorm-api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
