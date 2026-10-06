@@ -16,6 +16,8 @@
   const bannerTitle = $('bannerTitle');
   const bannerHint = $('bannerHint');
   const steps = document.querySelectorAll('.step');
+  const frame = $('frame');
+  const fullscreenBtn = $('fullscreenBtn');
 
   // Highlights the current step; earlier steps are marked done.
   function setStep(current) {
@@ -95,11 +97,19 @@
     }));
     pagePicker.hidden = pkg.pages.length < 2;
     player.src = pkg.launchUrl;
+    document.body.classList.add('playing');
     setStep(3);
     setBanner('NOW PLAYING', `SCORM ${pkg.scormVersion || 'n/a'} · ${pkg.files} files`);
   }
 
+  function toggleFullscreen() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else if (frame.requestFullscreen) frame.requestFullscreen().catch(() => {});
+  }
+
   function closeCourse() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    document.body.classList.remove('playing');
     // Let the course call LMSFinish from its unload handler before we reset the runtime.
     player.src = 'about:blank';
     setTimeout(() => window.ScormRuntime.stop(), 0);
@@ -144,4 +154,6 @@
 
   pageSelect.addEventListener('change', () => { player.src = pageSelect.value; });
   $('closeBtn').addEventListener('click', closeCourse);
+  fullscreenBtn.addEventListener('click', toggleFullscreen);
+  fullscreenBtn.hidden = !document.fullscreenEnabled;
 })();
