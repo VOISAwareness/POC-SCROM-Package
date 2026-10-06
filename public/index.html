@@ -3,34 +3,63 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SCORM LMS Player</title>
+  <title>VOIS LMS Player</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">
-      <span class="logo">LMS</span>
-      <span>Learning Management System <small>· POC</small></span>
-    </div>
-    <div id="courseBar" class="course-bar" hidden>
-      <span id="courseTitle" class="course-title"></span>
-      <label id="pagePicker" class="page-picker" hidden>
-        <span>Page</span>
-        <select id="pageSelect"></select>
-      </label>
-      <span id="courseStatus" class="pill">not attempted</span>
-      <button id="closeBtn" class="btn">Close course</button>
+    <div class="brand">VOIS<span>LMS</span><i>.</i></div>
+    <div class="user">
+      <span class="user-name">learner-001</span>
+      <span class="avatar" aria-hidden="true">L</span>
     </div>
   </header>
 
+  <div class="banner">
+    <strong id="bannerTitle">SCORM PACKAGE PLAYER</strong>
+    <em id="bannerHint">-- Upload a new course package</em>
+  </div>
+
+  <ol class="stepper" aria-label="Progress">
+    <li class="step active" data-step="1"><span class="num">1</span><span class="label">Upload <br />Package</span></li>
+    <li class="step" data-step="2"><span class="num">2</span><span class="label">Extract &amp; <br />Validate</span></li>
+    <li class="step" data-step="3"><span class="num">3</span><span class="label">Launch <br />Course</span></li>
+  </ol>
+
   <main>
     <section id="uploadView" class="upload-view">
-      <label id="dropZone" class="drop-zone" for="fileInput" tabindex="0">
-        <span class="plus" aria-hidden="true">+</span>
-        <strong>Add SCORM package</strong>
-        <span class="hint">Click to browse or drag &amp; drop your course <code>.zip</code> here</span>
-        <input id="fileInput" type="file" accept=".zip,application/zip" hidden />
-      </label>
+      <div class="cards">
+        <label id="dropZone" class="card card-peach drop-zone" for="fileInput" tabindex="0">
+          <span class="tag">SCORM 1.2 · 2004</span>
+          <span class="plus" aria-hidden="true">+</span>
+          <strong class="card-title">Add SCORM Package</strong>
+          <span class="card-desc"><b>Description:</b> Click to browse or drag &amp; drop your course <code>.zip</code> here. We extract it and launch <code>index_local.html</code> right away.</span>
+          <span class="btn btn-dark">Browse Files <span aria-hidden="true">→</span></span>
+          <input id="fileInput" type="file" accept=".zip,application/zip" hidden />
+        </label>
+
+        <article class="card card-red">
+          <header class="card-meta"><span class="code">PKG-STRUCTURE</span><span>What's inside</span></header>
+          <strong class="card-title">Expected Package Contents</strong>
+          <ul class="file-list">
+            <li><code>imsmanifest.xml</code> &amp; <code>*.xsd</code> schemas</li>
+            <li><code>index_local.html</code> <span class="muted">main page</span></li>
+            <li><code>index.html</code> <span class="muted">SCORM launcher</span></li>
+            <li><code>assets/</code> <code>fonts/</code> <code>content/</code></li>
+          </ul>
+          <p class="card-type"><b>Type:</b> Zip archive</p>
+        </article>
+
+        <article class="card card-purple">
+          <header class="card-meta"><span class="code">RUNTIME</span><span>Built in</span></header>
+          <strong class="card-title">Progress Tracking</strong>
+          <p class="card-desc"><b>Description:</b> The player provides the SCORM API, so the course can report status, score and bookmarks. They appear live in the header.</p>
+          <p class="card-type"><b>Type:</b> SCORM API</p>
+        </article>
+      </div>
+
       <div id="progress" class="progress" hidden>
         <div class="spinner"></div>
         <span id="progressText">Uploading…</span>
@@ -39,7 +68,19 @@
     </section>
 
     <section id="playerView" class="player-view" hidden>
-      <iframe id="player" title="SCORM course" allow="fullscreen; autoplay"></iframe>
+      <div id="courseBar" class="course-bar" hidden>
+        <span class="dot" aria-hidden="true"></span>
+        <span id="courseTitle" class="course-title"></span>
+        <label id="pagePicker" class="page-picker" hidden>
+          <span>Page</span>
+          <select id="pageSelect"></select>
+        </label>
+        <span id="courseStatus" class="pill">not attempted</span>
+        <button id="closeBtn" class="btn btn-outline">Close Course <span aria-hidden="true">✕</span></button>
+      </div>
+      <div class="frame">
+        <iframe id="player" title="SCORM course" allow="fullscreen; autoplay"></iframe>
+      </div>
     </section>
   </main>
 
