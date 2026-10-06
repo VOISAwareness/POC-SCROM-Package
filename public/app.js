@@ -18,6 +18,31 @@
   const steps = document.querySelectorAll('.step');
   const frame = $('frame');
   const fullscreenBtn = $('fullscreenBtn');
+  const scanCard = $('scanCard');
+  const scanState = $('scanState');
+  const scanBadge = $('scanBadge');
+  const scanBadgeText = $('scanBadgeText');
+  const scanItems = scanCard.querySelectorAll('[data-check]');
+
+  // Shows the server's security scan result on the Security Scan card.
+  function showScan(security) {
+    scanItems.forEach((li) => {
+      const result = security && security.checks.find((c) => c.id === li.dataset.check);
+      li.classList.remove('fail', 'warn');
+      li.querySelector('.detail')?.remove();
+      if (!result || result.status === 'pass') return;
+      li.classList.add(result.status);
+      if (result.detail) {
+        const detail = document.createElement('span');
+        detail.className = 'detail';
+        detail.textContent = result.detail;
+        li.append(detail);
+      }
+    });
+    const blocked = Boolean(security && !security.passed);
+    scanCard.classList.toggle('blocked', blocked);
+    scanState.textContent = blocked ? 'Upload blocked' : 'Runs on every upload';
+  }
 
   // Highlights the current step; earlier steps are marked done.
   function setStep(current) {
@@ -46,6 +71,7 @@
 
   function uploadPackage(file) {
     showError('');
+    showScan(null);
     if (!file) return;
     if (!/\.zip$/i.test(file.name)) {
       showError('Please choose a .zip SCORM package.');
@@ -60,7 +86,7 @@
     xhr.upload.onprogress = (e) => {
       if (!e.lengthComputable) return;
       const pct = Math.round((e.loaded / e.total) * 100);
-      setBusy(true, pct < 100 ? `Uploading… ${pct}%` : 'Extracting package…');
+      setBusy(true, pct < 100 ? `Uploading… ${pct}%` : 'Running security scan…');
       if (pct === 100) setStep(2);
     };
     xhr.onload = () => {
@@ -69,7 +95,8 @@
       try { body = JSON.parse(xhr.responseText); } catch (e) { /* non-JSON error */ }
       if (xhr.status >= 200 && xhr.status < 300) launch(body);
       else {
-        setStep(1);
+        setStep(body.security ? 2 : 1);
+        showScan(body.security);
         showError(body.error || `Upload failed (${xhr.status}).`);
       }
     };
@@ -83,6 +110,12 @@
   }
 
   function launch(pkg) {
+    showScan(null);
+    const passedCount = pkg.security.checks.filter((c) => c.status === 'pass').length;
+    scanBadgeText.textContent = `Security scan passed · ${passedCount}/${pkg.security.checks.length} checks`;
+    scanBadge.title = pkg.security.checks
+      .map((c) => `${c.status === 'pass' ? '✓' : '!'} ${c.label}${c.detail ? ` (${c.detail})` : ''}`)
+      .join('\n');
     window.ScormRuntime.start(pkg.id);
     courseTitle.textContent = pkg.title;
     courseTitle.title = `${pkg.title} · SCORM ${pkg.scormVersion || 'n/a'} · ${pkg.files} files`;

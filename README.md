@@ -40,6 +40,21 @@ The manifest can also sit inside a single top-level folder in the zip; the serve
 
 The header shows the course title and the live lesson status and score that the course reports.
 
+## Security scan
+
+Every upload is scanned in `security-scan.js` **before anything is written to disk**. If a check fails, the upload is blocked, nothing is extracted, and the screen names the failed check and file.
+
+| Check | Fails when |
+| --- | --- |
+| Valid zip archive | The file can't be opened as a zip |
+| Safe file paths | An entry uses `..`, an absolute path or a drive letter (path traversal) |
+| No executable or script files | The package contains `.exe`, `.dll`, `.bat`, `.ps1`, `.vbs`, `.sh`, `.jar`, `.php` and similar files |
+| No symbolic links | An entry is a symlink |
+| Size and compression limits | More than 20,000 entries, over 2 GB uncompressed, or a file over 1 MB compressed more than 200:1 (zip bomb) |
+| SCORM manifest present | `imsmanifest.xml` is missing. This is only a warning; the first HTML page opens instead |
+
+This is a structural check of the package, not an antivirus scan. For production, add a malware scan (for example ClamAV or the company's scanning service) as another check.
+
 ## Limits (it's a POC)
 
 - Uploads are stored on local disk and never cleaned up. Delete `uploads/` to reset.

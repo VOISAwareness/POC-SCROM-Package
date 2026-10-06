@@ -24,7 +24,7 @@
 
   <ol class="stepper" aria-label="Progress">
     <li class="step active" data-step="1"><span class="num">1</span><span class="label">Upload <br />Package</span></li>
-    <li class="step" data-step="2"><span class="num">2</span><span class="label">Extract &amp; <br />Validate</span></li>
+    <li class="step" data-step="2"><span class="num">2</span><span class="label">Security <br />Scan</span></li>
     <li class="step" data-step="3"><span class="num">3</span><span class="label">Launch <br />Course</span></li>
   </ol>
 
@@ -32,31 +32,29 @@
     <section id="uploadView" class="upload-view">
       <div class="cards">
         <label id="dropZone" class="card card-peach drop-zone" for="fileInput" tabindex="0">
-          <span class="tag">SCORM 1.2 · 2004</span>
-          <span class="plus" aria-hidden="true">+</span>
-          <strong class="card-title">Add SCORM Package</strong>
-          <span class="card-desc"><b>Description:</b> Click to browse or drag &amp; drop your course <code>.zip</code> here. We extract it and launch <code>index_local.html</code> right away.</span>
+          <span class="card-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m7 9 5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+          </span>
+          <strong class="card-title">Upload Course Package</strong>
+          <span class="card-desc">Select a SCORM <code>.zip</code> package, or drag and drop it here. It is security-scanned before it opens.</span>
           <span class="btn btn-dark">Browse Files <span aria-hidden="true">→</span></span>
           <input id="fileInput" type="file" accept=".zip,application/zip" hidden />
         </label>
 
-        <article class="card card-red">
-          <header class="card-meta"><span class="code">PKG-STRUCTURE</span><span>What's inside</span></header>
-          <strong class="card-title">Expected Package Contents</strong>
-          <ul class="file-list">
-            <li><code>imsmanifest.xml</code> &amp; <code>*.xsd</code> schemas</li>
-            <li><code>index_local.html</code> <span class="muted">main page</span></li>
-            <li><code>index.html</code> <span class="muted">SCORM launcher</span></li>
-            <li><code>assets/</code> <code>fonts/</code> <code>content/</code></li>
+        <article id="scanCard" class="card card-secure">
+          <header class="card-meta"><span class="code">SECURITY SCAN</span><span id="scanState">Runs on every upload</span></header>
+          <strong class="card-title"><span class="shield" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </span>Packages are scanned before they open</strong>
+          <ul id="scanList" class="check-list">
+            <li data-check="archive">Valid zip archive</li>
+            <li data-check="paths">Safe file paths (no path traversal)</li>
+            <li data-check="filetypes">No executable or script files</li>
+            <li data-check="symlinks">No symbolic links</li>
+            <li data-check="size">Size and compression limits (zip bomb)</li>
+            <li data-check="manifest">SCORM manifest present</li>
           </ul>
-          <p class="card-type"><b>Type:</b> Zip archive</p>
-        </article>
-
-        <article class="card card-purple">
-          <header class="card-meta"><span class="code">RUNTIME</span><span>Built in</span></header>
-          <strong class="card-title">Progress Tracking</strong>
-          <p class="card-desc"><b>Description:</b> The player provides the SCORM API, so the course can report status, score and bookmarks. They appear live in the header.</p>
-          <p class="card-type"><b>Type:</b> SCORM API</p>
+          <p class="card-type">Unsafe packages are blocked and never extracted.</p>
         </article>
       </div>
 
@@ -75,6 +73,10 @@
           <span>Page</span>
           <select id="pageSelect"></select>
         </label>
+        <span id="scanBadge" class="pill pill-safe" tabindex="0">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span id="scanBadgeText">Security scan passed</span>
+        </span>
         <span id="courseStatus" class="pill">not attempted</span>
         <button id="fullscreenBtn" class="btn btn-peach" type="button">Full Screen <span aria-hidden="true">⛶</span></button>
         <button id="closeBtn" class="btn btn-outline" type="button">Close Course <span aria-hidden="true">✕</span></button>
