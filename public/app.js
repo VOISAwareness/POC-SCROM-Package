@@ -13,6 +13,23 @@
   const courseStatus = $('courseStatus');
   const pagePicker = $('pagePicker');
   const pageSelect = $('pageSelect');
+  const bannerTitle = $('bannerTitle');
+  const bannerHint = $('bannerHint');
+  const steps = document.querySelectorAll('.step');
+
+  // Highlights the current step; earlier steps are marked done.
+  function setStep(current) {
+    steps.forEach((el) => {
+      const n = Number(el.dataset.step);
+      el.classList.toggle('active', n === current);
+      el.classList.toggle('done', n < current);
+    });
+  }
+
+  function setBanner(title, hint) {
+    bannerTitle.textContent = title;
+    bannerHint.textContent = `-- ${hint}`;
+  }
 
   function showError(message) {
     errorEl.textContent = message;
@@ -42,16 +59,21 @@
       if (!e.lengthComputable) return;
       const pct = Math.round((e.loaded / e.total) * 100);
       setBusy(true, pct < 100 ? `Uploading… ${pct}%` : 'Extracting package…');
+      if (pct === 100) setStep(2);
     };
     xhr.onload = () => {
       setBusy(false);
       let body = {};
       try { body = JSON.parse(xhr.responseText); } catch (e) { /* non-JSON error */ }
       if (xhr.status >= 200 && xhr.status < 300) launch(body);
-      else showError(body.error || `Upload failed (${xhr.status}).`);
+      else {
+        setStep(1);
+        showError(body.error || `Upload failed (${xhr.status}).`);
+      }
     };
     xhr.onerror = () => {
       setBusy(false);
+      setStep(1);
       showError('Network error while uploading the package.');
     };
     setBusy(true, 'Uploading…');
@@ -73,6 +95,8 @@
     }));
     pagePicker.hidden = pkg.pages.length < 2;
     player.src = pkg.launchUrl;
+    setStep(3);
+    setBanner('NOW PLAYING', `SCORM ${pkg.scormVersion || 'n/a'} · ${pkg.files} files`);
   }
 
   function closeCourse() {
@@ -84,12 +108,16 @@
     uploadView.hidden = false;
     fileInput.value = '';
     courseStatus.textContent = 'not attempted';
+    courseStatus.className = 'pill';
+    setStep(1);
+    setBanner('SCORM PACKAGE PLAYER', 'Upload a new course package');
   }
 
   window.ScormRuntime.onChange((data) => {
     const status = data['cmi.core.lesson_status'] || data['cmi.completion_status'] || 'not attempted';
     const score = data['cmi.core.score.raw'] || data['cmi.score.raw'];
     courseStatus.textContent = score ? `${status} · score ${score}` : status;
+    courseStatus.className = `pill ${status.replace(/\s+/g, '-')}`;
   });
 
   fileInput.addEventListener('change', () => uploadPackage(fileInput.files[0]));
