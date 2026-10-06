@@ -1,0 +1,5 @@
+body { font-family: system-ui, sans-serif; margin: 0; padding: 40px; background: #fdfaf3; color: #2b2b2b; }
+.card { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 32px; box-shadow: 0 4px 20px rgba(0,0,0,.08); }
+h1 { margin-top: 0; color: #2f6f4f; }
+button { background: #2f6f4f; color: #fff; border: 0; padding: 10px 18px; border-radius: 6px; cursor: pointer; font-size: 15px; }
+#log { font-family: monospace; font-size: 13px; color: #666; margin-top: 20px; }

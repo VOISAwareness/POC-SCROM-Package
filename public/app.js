@@ -1,0 +1,109 @@
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const dropZone = $('dropZone');
+  const fileInput = $('fileInput');
+  const progress = $('progress');
+  const progressText = $('progressText');
+  const errorEl = $('error');
+  const uploadView = $('uploadView');
+  const playerView = $('playerView');
+  const player = $('player');
+  const courseBar = $('courseBar');
+  const courseTitle = $('courseTitle');
+  const courseStatus = $('courseStatus');
+
+  function showError(message) {
+    errorEl.textContent = message;
+    errorEl.hidden = !message;
+  }
+
+  function setBusy(busy, text) {
+    dropZone.classList.toggle('busy', busy);
+    progress.hidden = !busy;
+    if (text) progressText.textContent = text;
+  }
+
+  function uploadPackage(file) {
+    showError('');
+    if (!file) return;
+    if (!/\.zip$/i.test(file.name)) {
+      showError('Please choose a .zip SCORM package.');
+      return;
+    }
+
+    const form = new FormData();
+    form.append('package', file);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/packages');
+    xhr.upload.onprogress = (e) => {
+      if (!e.lengthComputable) return;
+      const pct = Math.round((e.loaded / e.total) * 100);
+      setBusy(true, pct < 100 ? `Uploading… ${pct}%` : 'Extracting package…');
+    };
+    xhr.onload = () => {
+      setBusy(false);
+      let body = {};
+      try { body = JSON.parse(xhr.responseText); } catch (e) { /* non-JSON error */ }
+      if (xhr.status >= 200 && xhr.status < 300) launch(body);
+      else showError(body.error || `Upload failed (${xhr.status}).`);
+    };
+    xhr.onerror = () => {
+      setBusy(false);
+      showError('Network error while uploading the package.');
+    };
+    setBusy(true, 'Uploading…');
+    xhr.send(form);
+  }
+
+  function launch(pkg) {
+    window.ScormRuntime.start(pkg.id);
+    courseTitle.textContent = pkg.title;
+    courseTitle.title = `${pkg.title} · SCORM ${pkg.scormVersion || 'n/a'} · ${pkg.files} files`;
+    uploadView.hidden = true;
+    playerView.hidden = false;
+    courseBar.hidden = false;
+    player.src = pkg.launchUrl;
+  }
+
+  function closeCourse() {
+    // Let the course call LMSFinish from its unload handler before we reset the runtime.
+    player.src = 'about:blank';
+    setTimeout(() => window.ScormRuntime.stop(), 0);
+    playerView.hidden = true;
+    courseBar.hidden = true;
+    uploadView.hidden = false;
+    fileInput.value = '';
+    courseStatus.textContent = 'not attempted';
+  }
+
+  window.ScormRuntime.onChange((data) => {
+    const status = data['cmi.core.lesson_status'] || data['cmi.completion_status'] || 'not attempted';
+    const score = data['cmi.core.score.raw'] || data['cmi.score.raw'];
+    courseStatus.textContent = score ? `${status} · score ${score}` : status;
+  });
+
+  fileInput.addEventListener('change', () => uploadPackage(fileInput.files[0]));
+  dropZone.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+  });
+
+  ['dragenter', 'dragover'].forEach((type) =>
+    dropZone.addEventListener(type, (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragging');
+    })
+  );
+  ['dragleave', 'drop'].forEach((type) =>
+    dropZone.addEventListener(type, (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragging');
+    })
+  );
+  dropZone.addEventListener('drop', (e) => uploadPackage(e.dataTransfer.files[0]));
+  // Dropping a file outside the zone shouldn't navigate the browser away.
+  window.addEventListener('dragover', (e) => e.preventDefault());
+  window.addEventListener('drop', (e) => e.preventDefault());
+
+  $('closeBtn').addEventListener('click', closeCourse);
+})();
