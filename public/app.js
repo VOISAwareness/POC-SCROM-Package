@@ -11,6 +11,8 @@
   const courseBar = $('courseBar');
   const courseTitle = $('courseTitle');
   const courseStatus = $('courseStatus');
+  const pagePicker = $('pagePicker');
+  const pageSelect = $('pageSelect');
 
   function showError(message) {
     errorEl.textContent = message;
@@ -63,6 +65,13 @@
     uploadView.hidden = true;
     playerView.hidden = false;
     courseBar.hidden = false;
+    pageSelect.replaceChildren(...pkg.pages.map((page) => {
+      const label = page.name === pkg.manifestLaunch ? `${page.name} (manifest)` : page.name;
+      const option = new Option(label, page.url);
+      option.selected = page.url === pkg.launchUrl;
+      return option;
+    }));
+    pagePicker.hidden = pkg.pages.length < 2;
     player.src = pkg.launchUrl;
   }
 
@@ -105,5 +114,6 @@
   window.addEventListener('dragover', (e) => e.preventDefault());
   window.addEventListener('drop', (e) => e.preventDefault());
 
+  pageSelect.addEventListener('change', () => { player.src = pageSelect.value; });
   $('closeBtn').addEventListener('click', closeCourse);
 })();

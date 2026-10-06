@@ -95,8 +95,12 @@ function parseManifest(xml) {
   return result;
 }
 
+// Pages to prefer over the manifest's launch file, e.g. the self-contained `index_local.html`
+// that some authoring tools export next to the SCORM launcher `index.html`.
+const PREFERRED_PAGES = ['index_local.html', 'index_lms.html'];
+
 function fallbackLaunch(root) {
-  for (const name of ['index_lms.html', 'index.html', 'story.html', 'launch.html']) {
+  for (const name of [...PREFERRED_PAGES, 'index.html', 'story.html', 'launch.html']) {
     if (fs.existsSync(path.join(root, name))) return name;
   }
   const html = fs.readdirSync(root).find((f) => /\.html?$/i.test(f));
@@ -121,20 +125,31 @@ app.post('/api/packages', upload.single('package'), (req, res) => {
     let info = { title: null, version: null, launch: null };
     if (manifestPath) info = parseManifest(fs.readFileSync(manifestPath, 'utf8'));
 
-    let launch = info.launch;
-    const launchFile = launch && path.join(root, launch.split(/[?#]/)[0]);
-    if (!launch || !fs.existsSync(launchFile)) launch = fallbackLaunch(root);
-    if (!launch) throw new Error('Could not find a launch page (index_lms.html / index.html) in the package.');
+    let manifestLaunch = info.launch;
+    const manifestFile = manifestLaunch && path.join(root, manifestLaunch.split(/[?#]/)[0]);
+    if (manifestLaunch && !fs.existsSync(manifestFile)) manifestLaunch = null;
+
+    const preferred = PREFERRED_PAGES.find((name) => fs.existsSync(path.join(root, name)));
+    const launch = preferred || manifestLaunch || fallbackLaunch(root);
+    if (!launch) throw new Error('Could not find a launch page (index_local.html / index.html) in the package.');
 
     const rootRel = path.relative(UPLOAD_DIR, root).split(path.sep).map(encodeURIComponent).join('/');
-    const launchRel = launch.split('/').map((p) => (/[?#]/.test(p) ? p : encodeURIComponent(p))).join('/');
+    const toUrl = (page) =>
+      `/packages/${rootRel}/` + page.split('/').map((p) => (/[?#]/.test(p) ? p : encodeURIComponent(p))).join('/');
+
+    // Every HTML page in the package root, so the user can switch e.g. index_local.html <-> index.html.
+    const pages = fs.readdirSync(root).filter((f) => /\.html?$/i.test(f));
+    if (manifestLaunch && !pages.includes(manifestLaunch)) pages.push(manifestLaunch);
 
     res.json({
       id,
       title: info.title || req.file.originalname.replace(/\.zip$/i, ''),
       scormVersion: info.version,
       hasManifest: Boolean(manifestPath),
-      launchUrl: `/packages/${rootRel}/${launchRel}`,
+      launch,
+      launchUrl: toUrl(launch),
+      manifestLaunch,
+      pages: pages.map((name) => ({ name, url: toUrl(name) })),
       files: fileCount,
     });
   } catch (err) {

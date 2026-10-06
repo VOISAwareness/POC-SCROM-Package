@@ -34,6 +34,11 @@ body {
   font-size: 12px; padding: 3px 10px; border-radius: 999px;
   background: var(--primary-soft); color: var(--primary); white-space: nowrap;
 }
+.page-picker { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.page-picker select {
+  font: inherit; color: var(--text); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 6px; padding: 4px 6px;
+}
 .btn {
   border: 1px solid var(--border); background: var(--surface); color: var(--text);
   padding: 6px 14px; border-radius: 6px; cursor: pointer; font: inherit;

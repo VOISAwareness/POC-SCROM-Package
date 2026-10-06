@@ -3,7 +3,7 @@
 A dummy Learning Management System (LMS) to try out SCORM packages. The app has one screen:
 
 1. Click the **+** card, or drag a SCORM `.zip` onto it.
-2. The server extracts the zip and reads `imsmanifest.xml` to find the launch page, for example `index_lms.html`.
+2. The server extracts the zip and opens `index_local.html`. If the package doesn't have one, it uses the launch page named in `imsmanifest.xml`.
 3. The course opens in the same screen, inside an iframe, with its `assets/`, `fonts/` and `content/` folders served next to it.
 
 ## Run it
@@ -16,8 +16,8 @@ npm start            # http://localhost:3000
 To get a test package, run `npm run build:sample`. It creates `samples/sample-course.zip` with the usual SCORM 1.2 layout:
 
 ```
-adlcp_rootv1p2.xsd  favicon.ico  imscp_rootv1p1p2.xsd  imsmanifest.xml
-index_lms.html  index.html  assets/  fonts/  content/
+adlcp_rootv1p2.xsd  favicon.ico  ims_xml.xsd  imscp_rootv1p1p2.xsd  imsmanifest.xml
+imsmd_rootv1p2p1.xsd  index.html  index_local.html  v.json  assets/  fonts/  content/
 ```
 
 ## How it works
@@ -30,9 +30,11 @@ index_lms.html  index.html  assets/  fonts/  content/
 
 How the launch page is chosen:
 
-1. The `href` of the resource that the first organization item points to in `imsmanifest.xml`.
-2. If that doesn't work, the first SCO or resource with an `href`.
-3. If that doesn't work either, `index_lms.html`, `index.html`, `story.html` or `launch.html` in the package root.
+1. `index_local.html` (or `index_lms.html`) if it's in the package root. This is the full, self-contained course page that some authoring tools export.
+2. If it's missing, the `href` that `imsmanifest.xml` gives for the first lesson (usually `index.html`).
+3. If that's missing too, `index.html`, `story.html` or `launch.html` in the package root.
+
+If the package has more than one HTML page, a **Page** menu appears in the header. Use it to switch, for example between `index_local.html` and `index.html`. The page the manifest points to is labelled "(manifest)".
 
 The manifest can also sit inside a single top-level folder in the zip; the server finds it there.
 

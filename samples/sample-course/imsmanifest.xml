@@ -17,8 +17,8 @@
     </organization>
   </organizations>
   <resources>
-    <resource identifier="res_1" type="webcontent" adlcp:scormtype="sco" href="index_lms.html">
-      <file href="index_lms.html" />
+    <resource identifier="res_1" type="webcontent" adlcp:scormtype="sco" href="index.html">
+      <file href="index.html" />
     </resource>
   </resources>
 </manifest>
